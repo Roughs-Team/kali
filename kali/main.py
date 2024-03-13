@@ -7,3 +7,6 @@ for labeler in labelers:
 
 
 bot.run_forever()
+
+def start():
+    bot.run_forever()
