@@ -2,13 +2,17 @@
 name = "kali"
 version = "0.1.0"
 description = "A multifunctional VK bot"
-authors = ["Nikolay Myagkov <vertexofvortex@gmail.com>", "Gleb Buvanenko <buvanenko@gmail.com>"]
+authors = [
+    "Nikolay Myagkov <vertexofvortex@gmail.com>",
+    "Gleb Buvanenko <buvanenko@gmail.com>",
+]
 readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.12"
 vkbottle = "^4.3.12"
 python-dotenv = "^1.0.1"
+ruff = "^0.3.2"
 
 [build-system]
 requires = ["poetry-core"]

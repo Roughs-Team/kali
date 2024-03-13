@@ -1,7 +1,6 @@
-
+import random
 import re
 import aiohttp
-import random
 from vkbottle.bot import BotLabeler, Message
 
 import config
@@ -11,12 +10,13 @@ from rules.text import ChitChatRule
 
 labeler = BotLabeler()
 
-sber_url = 'https://api.aicloud.sbercloud.ru/public/v2/boltalka/predict'
+sber_url = "https://api.aicloud.sbercloud.ru/public/v2/boltalka/predict"
 context = {}
 
 EMOJI_PATTERN = re.compile(
     r"[\U0001F600-\U0001F64F\U0001F300-\U0001F5FF\U0001F680-\U0001F6FF\U0001F1E0-\U0001F1FF]+"
 )
+
 
 def remove_emoji(text) -> str:
     text = EMOJI_PATTERN.sub(". ", text)
@@ -53,24 +53,29 @@ async def get_answer(text: str, peer_id: int):
         context[str(peer_id)] = [text]
 
     data = {"instances": [{"contexts": [context[str(peer_id)]]}]}
-    headers = {'Content-Type': 'application/json'}
+    headers = {"Content-Type": "application/json"}
 
     async with aiohttp.ClientSession() as session:
         async with session.post(sber_url, json=data, headers=headers) as resp:
             response = await resp.json()
-            answer = response['responses'].split("['")[1].split("']")[0]
-    
+            answer = response["responses"].split("['")[1].split("']")[0]
+
     context[str(peer_id)].append(answer)
     context[str(peer_id)] = context[str(peer_id)][-10:]
     return answer
 
+
 def generate_reply(message: Message):
-    return '{' + f'"peer_id": {message.peer_id}, "conversation_message_ids": [{message.conversation_message_id}], \
-        "is_reply": 1' + '}'
+    return (
+        "{"  # noqa: ISC003
+        + f'"peer_id": {message.peer_id}, "conversation_message_ids": \
+          [{message.conversation_message_id}], "is_reply": 1'
+        + "}"
+    )
+
 
 @labeler.message(ChitChatRule())
 async def chitchat_handler(message: Message):
-
     await bot.api.messages.set_activity(peer_id=message.peer_id, type="typing")
 
     answer = await get_answer(message.text, message.peer_id)
