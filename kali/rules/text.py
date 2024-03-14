@@ -1,7 +1,8 @@
-import config
-
+import re
 from vkbottle.dispatch.rules.abc import ABCRule
 from vkbottle.tools.dev.mini_types.base import BaseMessageMin
+
+import config
 
 
 class TextRule(ABCRule[BaseMessageMin]):
@@ -26,15 +27,13 @@ class CommandRule(ABCRule[BaseMessageMin]):
 
 class ChitChatRule(ABCRule[BaseMessageMin]):
     async def check(self, message: BaseMessageMin) -> bool:
-        if message.from_id == message.peer_id:
-            print("True" * 100)
-            return True
+        id_match = re.search(r"\[(id|club|group)(\d+)\|", message.text)
+        id_from_message = int(id_match.group(2)) if id_match else None
 
-        elif message.text.lower().startswith(
-            config.BOT_NAME.lower() + ","
-        ) or message.text.lower().startswith(config.BOT_NAME.lower() + " "):
-            return True
-        elif message.reply_message.from_id == -config.VK_GROUP_ID:
-            return True
-
-        return False
+        return (
+            message.from_id == message.peer_id
+            or message.text.lower().startswith(config.BOT_NAME.lower() + ",")
+            or message.text.lower().startswith(config.BOT_NAME.lower() + " ")
+            or message.reply_message.from_id == -config.VK_GROUP_ID
+            or id_from_message == config.VK_GROUP_ID
+        )
